@@ -1,6 +1,20 @@
-// データベース初期化（既存のコードの後に追加）
+const express = require('express');
+const cors = require('cors');
+const morgan = require('morgan');
+const { Pool } = require('pg');
+require('dotenv').config();
+
+// データベース接続設定
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+});
+
+// データベース初期化関数
 async function initDatabase() {
   try {
+    console.log('🔄 Initializing database...');
+    
     await pool.query(`
       CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
@@ -23,19 +37,11 @@ async function initDatabase() {
       )
     `);
     
-    console.log('✅ Database initialized');
+    console.log('✅ Database tables ready');
   } catch (error) {
     console.error('❌ Database init error:', error);
   }
 }
-
-// サーバー起動時に実行
-initDatabase();
-
-const express = require('express');
-const cors = require('cors');
-const morgan = require('morgan');
-require('dotenv').config();
 
 // Import middleware
 const { securityHeaders, sanitizeInput, generalLimiter } = require('./middleware/security');
@@ -107,10 +113,13 @@ app.use(notFoundHandler);
 app.use(errorHandler);
 
 // Start server
-const server = app.listen(PORT, () => {
+const server = app.listen(PORT, async () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📊 Health check: http://localhost:${PORT}/health`);
   console.log(`🔒 Environment: ${process.env.NODE_ENV || 'development'}`);
+  
+  // サーバー起動後にデータベース初期化
+  await initDatabase();
 });
 
 // Graceful shutdown
