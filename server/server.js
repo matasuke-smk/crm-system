@@ -63,15 +63,21 @@ app.use(securityHeaders);
 app.use(generalLimiter);
 app.use(sanitizeInput);
 
-// CORS configuration
+// CORS configuration - より柔軟な設定
 const corsOptions = {
-  origin: [
-    process.env.CLIENT_URL,
-    'http://localhost:3000',
-    'https://crm-system-tawny.vercel.app',
-    'https://crm-system-nlya3kr8i-matasukes-projects-09ec9f81.vercel.app',
-    /^https:\/\/crm-system-.*\.vercel\.app$/
-  ],
+  origin: function (origin, callback) {
+    // 開発環境では全てのオリジンを許可
+    if (!origin) return callback(null, true);
+    
+    // Vercelのプリビューデプロイを含む全てのVercelドメインを許可
+    if (origin.includes('vercel.app') || 
+        origin.includes('localhost') ||
+        origin === process.env.CLIENT_URL) {
+      return callback(null, true);
+    }
+    
+    callback(new Error('Not allowed by CORS'));
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
