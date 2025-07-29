@@ -63,21 +63,9 @@ app.use(securityHeaders);
 app.use(generalLimiter);
 app.use(sanitizeInput);
 
-// CORS configuration - より柔軟な設定
+// CORS configuration - 全許可（開発用）
 const corsOptions = {
-  origin: function (origin, callback) {
-    // 開発環境では全てのオリジンを許可
-    if (!origin) return callback(null, true);
-    
-    // Vercelのプリビューデプロイを含む全てのVercelドメインを許可
-    if (origin.includes('vercel.app') || 
-        origin.includes('localhost') ||
-        origin === process.env.CLIENT_URL) {
-      return callback(null, true);
-    }
-    
-    callback(new Error('Not allowed by CORS'));
-  },
+  origin: true, // すべてのオリジンを許可
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
