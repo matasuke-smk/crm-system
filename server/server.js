@@ -65,12 +65,17 @@ app.use(sanitizeInput);
 
 // CORS configuration
 const corsOptions = {
-  origin: process.env.CLIENT_URL || 'http://localhost:3000',
+  origin: [
+    process.env.CLIENT_URL,
+    'http://localhost:3000',
+    'https://crm-system-tawny.vercel.app',
+    'https://crm-system-nlya3kr8i-matasukes-projects-09ec9f81.vercel.app',
+    /^https:\/\/crm-system-.*\.vercel\.app$/
+  ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 };
-app.use(cors(corsOptions));
 
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
